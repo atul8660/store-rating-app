@@ -1,4 +1,5 @@
 const express = require("express");
+const pool = require("./config/db");
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.get("/api/health", (req,res) => {
         message: "API is healthy"
     });
 });
+
 
 app.listen(PORT, () =>{
     console.log(`Server is running on port ${PORT}`);

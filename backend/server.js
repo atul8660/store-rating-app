@@ -1,5 +1,8 @@
 const express = require("express");
 const pool = require("./config/db");
+const authRoutes = require("./routes/authRoutes");
+const authenticateToken = require("./middleware/authMiddleware");
+const authorizeRoles = require("./middleware/roleMiddleware");
 
 const app = express();
 
@@ -8,7 +11,9 @@ const PORT = 5000;
 // It is a middleware to understand json data
 app.use(express.json());
 
-app.get("/", (re,res) => {
+app.use("/api/auth", authRoutes);
+
+app.get("/", (req,res) => {
     res.json({
         message: "Store Rating API is running"
     });

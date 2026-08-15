@@ -1,4 +1,6 @@
 const express = require("express");
+const cors = require("cors");
+
 const pool = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const authenticateToken = require("./middleware/authMiddleware");
@@ -11,6 +13,8 @@ const app = express();
 
 const PORT = 5000;
 
+// CORS
+app.use(cors());
 // It is a middleware to understand json data
 app.use(express.json());
 

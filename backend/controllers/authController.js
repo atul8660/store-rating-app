@@ -329,8 +329,86 @@ const updatePassword = async (req, res) => {
 };
 
 
+// Public (pre-login) change password endpoint
+const updatePasswordPublic = async (req, res) => {
+    try {
+        const { email, currentPassword, newPassword } = req.body;
+
+        if (!email || !currentPassword || !newPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "Email, current password and new password are required"
+            });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid email format"
+            });
+        }
+
+        // Password validation - reuse same rules
+        const passwordRegex = /^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,16}$/;
+        if (!passwordRegex.test(newPassword)) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "New password must be 8-16 characters and contain at least one uppercase letter and one special character"
+            });
+        }
+
+        // Find user by email
+        const [users] = await pool.query(
+            "SELECT id, password FROM users WHERE email = ?",
+            [email]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        const user = users[0];
+
+        const isPasswordValid = await bcrypt.compare(
+            currentPassword,
+            user.password
+        );
+
+        if (!isPasswordValid) {
+            return res.status(401).json({
+                success: false,
+                message: "Current password is incorrect"
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await pool.query(
+            "UPDATE users SET password = ? WHERE id = ?",
+            [hashedPassword, user.id]
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Password updated successfully"
+        });
+    } catch (error) {
+        console.error("Public update password error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update password"
+        });
+    }
+};
+
 module.exports = {
     signup,
     login,
-    updatePassword
+    updatePassword,
+    updatePasswordPublic
 };

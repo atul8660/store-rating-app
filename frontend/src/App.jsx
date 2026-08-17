@@ -6,6 +6,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import ChangePassword from "./pages/ChangePassword";
+import ChangePasswordPublic from "./pages/ChangePasswordPublic";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -56,6 +57,9 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+
+                {/* Public change password (accessible without login) */}
+                <Route path="/change-password-public" element={<ChangePasswordPublic />} />
             </Routes>
         </BrowserRouter>
     );

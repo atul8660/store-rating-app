@@ -146,6 +146,16 @@ function Login() {
                         >
                             Sign Up
                         </button>
+
+                    {/* Change Password (public) */}
+                    <button
+                        className="btn btn-secondary"
+                        type="button"
+                        style={{ marginLeft: "10px" }}
+                        onClick={() => navigate("/change-password-public")}
+                    >
+                        Change Password
+                    </button>
                     </div>
                 </section>
             </main>

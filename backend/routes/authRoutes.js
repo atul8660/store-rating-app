@@ -1,5 +1,5 @@
 const express = require("express");
-const { signup, login, updatePassword } = require("../controllers/authController");
+const { signup, login, updatePassword, updatePasswordPublic } = require("../controllers/authController");
 const authenticateToken = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/roleMiddleware");
 
@@ -14,5 +14,8 @@ router.put(
     authorizeRoles("USER", "OWNER"),
     updatePassword
 );
+
+// Public endpoint to change password before login
+router.put("/password/public", updatePasswordPublic);
 
 module.exports = router;

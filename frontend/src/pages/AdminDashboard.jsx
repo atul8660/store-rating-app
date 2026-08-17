@@ -72,6 +72,9 @@ function AdminDashboard() {
         ownerId: ""
     });
 
+    // list of OWNER users for owner selection in store form
+    const [owners, setOwners] = useState([]);
+
     const [storeFormMessage, setStoreFormMessage] = useState("");
 
     // =========================
@@ -214,6 +217,23 @@ function AdminDashboard() {
     };
 
     // =========================
+    // Owners (for assigning store owner)
+    // =========================
+
+    const fetchOwners = async () => {
+        try {
+            const response = await api.get("/admin/users", {
+                params: { role: "OWNER", sortBy: "name", order: "ASC" }
+            });
+
+            setOwners(response.data.users || []);
+        } catch (error) {
+            console.error("Fetch owners error:", error);
+            // don't surface as blocking message to the whole page; keep store form usable
+        }
+    };
+
+    // =========================
     // Initial load
     // =========================
 
@@ -225,7 +245,8 @@ function AdminDashboard() {
             await Promise.all([
                 fetchDashboard(),
                 fetchUsers(),
-                fetchStores()
+                fetchStores(),
+                fetchOwners()
             ]);
         } finally {
             setLoading(false);
@@ -349,17 +370,18 @@ function AdminDashboard() {
         try {
             setStoreFormMessage("");
 
+            // Require owner selection
+            if (!newStore.ownerId) {
+                setStoreFormMessage("Please select a store owner.");
+                return;
+            }
+
             const payload = {
                 name: newStore.name,
                 email: newStore.email,
-                address: newStore.address
+                address: newStore.address,
+                ownerId: Number(newStore.ownerId)
             };
-
-            if (newStore.ownerId) {
-                payload.ownerId = Number(
-                    newStore.ownerId
-                );
-            }
 
             const response = await api.post(
                 "/admin/stores",
@@ -1191,20 +1213,23 @@ function AdminDashboard() {
 
                                 <div className="form-group">
                                     <label>
-                                        Owner ID
+                                        Store Owner
                                     </label>
 
-                                    <input
-                                        type="number"
+                                    <select
                                         name="ownerId"
-                                        value={
-                                            newStore.ownerId
-                                        }
-                                        onChange={
-                                            handleStoreFormChange
-                                        }
-                                        placeholder="Optional"
-                                    />
+                                        value={newStore.ownerId}
+                                        onChange={handleStoreFormChange}
+                                        required
+                                    >
+                                        <option value="">-- Select Owner --</option>
+
+                                        {owners.map((o) => (
+                                            <option key={o.id} value={o.id}>
+                                                {o.name} ({o.email})
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
 
